@@ -197,7 +197,7 @@ canvas {
   display: flex;
   gap: 2rem;
   align-items: flex-start;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 180px);
   /* Adjust for header */
 }
 
@@ -210,17 +210,49 @@ canvas {
 .right-panel {
   flex: 1 1 auto;
   height: 100%;
-  overflow-y: auto;
   padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .passes-container {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .pass-result h3 {
   margin-top: 0;
   color: var(--text-secondary);
+}
+
+.results-stats {
+  display: flex;
+  gap: 2rem;
+  background-color: var(--surface-color);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
 }

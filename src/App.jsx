@@ -82,6 +82,9 @@ function App() {
     return acc;
   }, {});
 
+  const totalCellsCleared = solutions.reduce((acc, sol) => acc + sol.cells.length, 0);
+  const totalScore = totalCellsCleared * 1000;
+
   return (
     <div className="container">
       <header>
@@ -100,27 +103,41 @@ function App() {
           </div>
         </div>
 
-        <div className="right-panel">
-          {step === 'calibrate' && (
-            <CalibrationPanel
-              clusters={clusters}
-              onCalibrationComplete={handleCalibrationComplete}
-            />
-          )}
+        {step !== 'paste' && (
+          <div className="right-panel">
+            {step === 'calibrate' && (
+              <CalibrationPanel
+                clusters={clusters}
+                onCalibrationComplete={handleCalibrationComplete}
+              />
+            )}
 
-          {step === 'result' && (
-            <div className="passes-container">
-              {Object.keys(solutionsByPass).map(pass => (
-                <PassResult
-                  key={pass}
-                  passIndex={pass}
-                  image={lastImage}
-                  solutions={solutionsByPass[pass]}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+            {step === 'result' && (<>
+              <div className="results-stats">
+                <div className="stat-item">
+                  <span className="stat-label">Cells Cleared</span>
+                  <span className="stat-value">{totalCellsCleared}</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Possible Score</span>
+                  <span className="stat-value">{totalScore.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="passes-container">
+                {Object.keys(solutionsByPass).map(pass => (
+                  <PassResult
+                    key={pass}
+                    passIndex={pass}
+                    image={lastImage}
+                    solutions={solutionsByPass[pass]}
+                  />
+                ))}
+              </div>
+            </>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
