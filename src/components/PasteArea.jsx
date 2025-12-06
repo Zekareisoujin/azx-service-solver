@@ -43,9 +43,12 @@ const PasteArea = ({ onImageProcessed }) => {
     };
 
     return (
-        <div className={`paste-area ${!isWaiting ? 'has-content' : ''}`}>
-            {isWaiting && <div className="placeholder-text">Waiting for image... (Ctrl+V)</div>}
-            <canvas ref={canvasRef} style={{ display: isWaiting ? 'none' : 'block' }} />
+        <div className="paste-area-container">
+            {!isWaiting && <h3 className='paste-area-header'>Reference image</h3>}
+            <div className={`paste-area ${!isWaiting ? 'has-content' : ''}`}>
+                {isWaiting && <div className="placeholder-text">Waiting for image... (Ctrl+V)</div>}
+                <canvas ref={canvasRef} style={{ display: isWaiting ? 'none' : 'block' }} />
+            </div>
         </div>
     );
 };

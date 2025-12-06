@@ -44,6 +44,15 @@ p {
   margin: 0;
 }
 
+.paste-area-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.paste-area-header {
+  color: var(--text-secondary);
+}
+
 .paste-area {
   background-color: var(--surface-color);
   border: 2px dashed var(--border-color);
@@ -182,6 +191,27 @@ canvas {
 .secondary-button:hover {
   border-color: var(--text-secondary);
   color: var(--text-primary);
+}
+
+.main-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  height: calc(100vh - 120px);
+  /* Adjust for header */
+}
+
+.left-panel {
+  flex: 1 1 auto;
+  position: sticky;
+  top: 0;
+}
+
+.right-panel {
+  flex: 1 1 auto;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 1rem;
 }
 
 .passes-container {

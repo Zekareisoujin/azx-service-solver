@@ -89,18 +89,26 @@ function App() {
         <p>Paste your number grid image (Ctrl+V)</p>
       </header>
 
-      <main>
-        <PasteArea onImageProcessed={handleImageProcessed} />
+      <main className="main-layout">
+        <div className="left-panel">
+          <PasteArea onImageProcessed={handleImageProcessed} />
 
-        {step === 'calibrate' && (
-          <CalibrationPanel
-            clusters={clusters}
-            onCalibrationComplete={handleCalibrationComplete}
-          />
-        )}
+          <div style={{ marginTop: '20px' }}>
+            <button className="secondary-button" onClick={handleRecalibrate}>
+              Recalibrate
+            </button>
+          </div>
+        </div>
 
-        {step === 'result' && (
-          <>
+        <div className="right-panel">
+          {step === 'calibrate' && (
+            <CalibrationPanel
+              clusters={clusters}
+              onCalibrationComplete={handleCalibrationComplete}
+            />
+          )}
+
+          {step === 'result' && (
             <div className="passes-container">
               {Object.keys(solutionsByPass).map(pass => (
                 <PassResult
@@ -111,13 +119,8 @@ function App() {
                 />
               ))}
             </div>
-            <ResultsPanel
-              output={gridData}
-              isProcessing={false}
-              onRecalibrate={handleRecalibrate}
-            />
-          </>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
