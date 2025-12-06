@@ -23,7 +23,8 @@ export const scanGrid = (blobs, calibrationData, width, height) => {
       // (We need to update processImage to attach data to all blobs, not just clusters)
       
       if (blob.data && template.data) {
-          const score = compareData(blob.data, template.data);
+          // Use sliding window matching to handle slight misalignments
+          const score = compareDataWithOffset(blob, template);
           if (score > 0.85 && score > maxScore) {
               maxScore = score;
               bestMatch = template.label;
@@ -131,11 +132,58 @@ export const scanGrid = (blobs, calibrationData, width, height) => {
   return alignedRows;
 };
 
-function compareData(data1, data2) {
-    if (data1.length !== data2.length) return 0;
-    let matches = 0;
-    for(let i=0; i<data1.length; i++) {
-        if (data1[i] === data2[i]) matches++;
+function compareDataWithOffset(blob, template) {
+    let maxScore = 0;
+    
+    // Try offsets: -1, 0, 1 in both X and Y
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+            const score = compareData(blob, template, dx, dy);
+            if (score > maxScore) maxScore = score;
+        }
     }
-    return matches / data1.length;
+    return maxScore;
+}
+
+function compareData(blob, template, offsetX, offsetY) {
+    const data1 = blob.data;
+    const data2 = template.data;
+    const w1 = blob.w;
+    const h1 = blob.h;
+    const w2 = template.w;
+    const h2 = template.h;
+    
+    let matches = 0;
+    let total = 0;
+
+    // Determine the overlapping region
+    const startX = Math.max(0, -offsetX);
+    const startY = Math.max(0, -offsetY);
+    const endX = Math.min(w1, w2 - offsetX);
+    const endY = Math.min(h1, h2 - offsetY);
+
+    for (let y = startY; y < endY; y++) {
+        for (let x = startX; x < endX; x++) {
+            const idx1 = y * w1 + x;
+            const idx2 = (y + offsetY) * w2 + (x + offsetX);
+            
+            if (data1[idx1] === data2[idx2]) {
+                matches++;
+            }
+            total++;
+        }
+    }
+    
+    // Penalize for non-overlapping pixels (size mismatch)
+    const totalPixels = Math.max(w1 * h1, w2 * h2);
+    // Adjust total to account for the full area, not just overlap
+    // A simple way is to treat non-overlapping pixels as mismatches
+    
+    if (total === 0) return 0;
+    
+    // We want to count matches over the UNION of the areas.
+    // Matches / (Area1 + Area2 - Matches) ? Jaccard index?
+    // Or just Matches / MaxArea.
+    
+    return matches / totalPixels;
 }
