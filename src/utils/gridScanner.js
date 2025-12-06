@@ -42,31 +42,93 @@ export const scanGrid = (blobs, calibrationData, width, height) => {
     }
   }
 
-  // 2. Sort digits into rows and columns
+  // 2. Sort digits into rows
   // Sort by Y first to find rows
   detectedDigits.sort((a, b) => a.y - b.y);
 
-  const rows = [];
+  const rawRows = [];
   let currentRow = [];
   let lastY = -1;
 
   for (const digit of detectedDigits) {
-    if (lastY === -1 || Math.abs(digit.y - lastY) < 20) { // Row height threshold
+    // Use a dynamic threshold based on digit height, default to 20 if height is missing
+    const threshold = digit.h ? digit.h * 0.5 : 20;
+    
+    if (lastY === -1 || Math.abs(digit.y - lastY) < threshold) {
       currentRow.push(digit);
     } else {
       // Sort current row by X
       currentRow.sort((a, b) => a.x - b.x);
-      rows.push(currentRow);
+      rawRows.push(currentRow);
       currentRow = [digit];
     }
     lastY = digit.y;
   }
   if (currentRow.length > 0) {
     currentRow.sort((a, b) => a.x - b.x);
-    rows.push(currentRow);
+    rawRows.push(currentRow);
   }
 
-  return rows;
+  // 3. Align columns
+  if (rawRows.length === 0) return [];
+
+  // Calculate grid pitch (average distance between columns)
+  // Collect all x-distances between adjacent cells in all rows
+  const xDistances = [];
+  rawRows.forEach(row => {
+    for (let i = 0; i < row.length - 1; i++) {
+      const dist = row[i+1].x - row[i].x;
+      xDistances.push(dist);
+    }
+  });
+
+  // Calculate median pitch
+  xDistances.sort((a, b) => a - b);
+  let gridPitch = 0;
+  if (xDistances.length > 0) {
+      const mid = Math.floor(xDistances.length / 2);
+      gridPitch = xDistances[mid];
+  }
+  
+  // Fallback if no distances found (single column?)
+  if (gridPitch === 0 && detectedDigits.length > 0) {
+      gridPitch = detectedDigits[0].w || 40; 
+  }
+
+  // Find global min X to use as anchor
+  let minX = Infinity;
+  detectedDigits.forEach(d => {
+      if (d.x < minX) minX = d.x;
+  });
+
+  // Construct the aligned grid
+  const alignedRows = [];
+  
+  rawRows.forEach(row => {
+      const alignedRow = [];
+      row.forEach(digit => {
+          // Calculate column index
+          const colIndex = Math.round((digit.x - minX) / gridPitch);
+          
+          // Fill gaps with null
+          while (alignedRow.length < colIndex) {
+              alignedRow.push(null);
+          }
+          // Ensure we don't overwrite if multiple digits map to same col (shouldn't happen with correct pitch)
+          alignedRow[colIndex] = digit;
+      });
+      alignedRows.push(alignedRow);
+  });
+
+  // Normalize row lengths
+  const maxCols = Math.max(...alignedRows.map(r => r.length));
+  alignedRows.forEach(row => {
+      while (row.length < maxCols) {
+          row.push(null);
+      }
+  });
+
+  return alignedRows;
 };
 
 function compareData(data1, data2) {

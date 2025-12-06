@@ -21,10 +21,18 @@ const PassResult = ({ image, solutions, passIndex }) => {
         // Draw solutions
         if (currentSolutions.length > 0) {
             ctx.lineWidth = 3;
-            ctx.strokeStyle = '#3b82f6'; // Primary blue
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
 
-            currentSolutions.forEach(sol => {
+            currentSolutions.forEach((sol, index) => {
+                // Generate a unique color for this solution
+                // Use HSL to ensure distinctness and good visibility
+                const hue = (index * 137.508) % 360; // Golden angle approximation
+                const color = `hsla(${hue}, 70%, 50%, 1)`;
+                const fillColor = `hsla(${hue}, 70%, 50%, 0.4)`;
+
+                ctx.strokeStyle = color;
+                ctx.fillStyle = fillColor;
+
+                // Draw bounding box for the solution
                 ctx.fillRect(sol.x, sol.y, sol.w, sol.h);
                 ctx.strokeRect(sol.x, sol.y, sol.w, sol.h);
             });

@@ -16,6 +16,7 @@ function App() {
   const [calibrationData, setCalibrationData] = useState(null);
   const [solutions, setSolutions] = useState([]);
   const [lastImage, setLastImage] = useState(null);
+  const [pasteKey, setPasteKey] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem('azx_calibration');
@@ -43,7 +44,7 @@ function App() {
       setSolutions(solved);
 
       const outputText = `Found ${solved.length} subgrids summing to 10.\n\n` +
-        grid.map(row => row.map(c => c.value).join(' ')).join('\n');
+        grid.map(row => row.map(c => c ? c.value : '.').join(' ')).join('\n');
       setGridData(outputText);
       setStep('result');
     } else if (result.uniqueTemplates.length > 0) {
@@ -62,7 +63,7 @@ function App() {
     setSolutions(solved);
 
     const outputText = `Found ${solved.length} subgrids summing to 10.\n\n` +
-      grid.map(row => row.map(c => c.value).join(' ')).join('\n');
+      grid.map(row => row.map(c => c ? c.value : '.').join(' ')).join('\n');
     setGridData(outputText);
     setStep('result');
   };
@@ -73,6 +74,17 @@ function App() {
       setCalibrationData(null);
       setStep('calibrate');
     }
+  };
+
+  const handleClear = () => {
+    setStep('paste');
+    setLastImage(null);
+    setSolutions([]);
+    setGridData(null);
+    setBlobs([]);
+    setClusters([]);
+    setImageDims({ w: 0, h: 0 });
+    setPasteKey(prev => prev + 1);
   };
 
   // Group solutions by pass
@@ -94,13 +106,18 @@ function App() {
 
       <main className="main-layout">
         <div className="left-panel">
-          <PasteArea onImageProcessed={handleImageProcessed} />
+          <PasteArea key={pasteKey} onImageProcessed={handleImageProcessed} />
 
-          {calibrationData && (
-            <div style={{ marginTop: '20px' }}>
-              <button className="secondary-button" onClick={handleRecalibrate}>
-                Recalibrate
+          {step !== 'paste' && (
+            <div style={{ marginTop: '20px', display: 'flex', gap: '10px' }}>
+              <button className="secondary-button" onClick={handleClear}>
+                Clear Image
               </button>
+              {calibrationData && (
+                <button className="secondary-button" onClick={handleRecalibrate}>
+                  Recalibrate
+                </button>
+              )}
             </div>
           )}
         </div>
