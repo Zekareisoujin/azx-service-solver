@@ -94,7 +94,10 @@ function App() {
     return acc;
   }, {});
 
-  const totalCellsCleared = solutions.reduce((acc, sol) => acc + sol.cells.length, 0);
+  const totalCellsCleared = solutions.reduce((acc, sol) => {
+    const validCells = sol.cells.filter(c => c.value !== '0' && c.value !== 0);
+    return acc + validCells.length;
+  }, 0);
   const totalScore = totalCellsCleared * 1000;
 
   return (
