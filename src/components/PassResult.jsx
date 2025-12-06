@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-const PassResult = ({ image, solutions, passIndex }) => {
+const PassResult = ({ passIndex, image, solutions, clearedCells }) => {
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -16,7 +16,15 @@ const PassResult = ({ image, solutions, passIndex }) => {
         const ctx = canvas.getContext('2d');
         canvas.width = img.width;
         canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(image, 0, 0);
+
+        // Mask out cleared cells from previous passes
+        if (clearedCells && clearedCells.length > 0) {
+            ctx.fillStyle = '#1e293b'; // Surface color to fully hide them
+            clearedCells.forEach(cell => {
+                ctx.fillRect(cell.x, cell.y, cell.w, cell.h);
+            });
+        }
 
         // Draw solutions
         if (currentSolutions.length > 0) {

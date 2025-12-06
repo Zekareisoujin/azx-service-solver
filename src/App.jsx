@@ -144,14 +144,22 @@ function App() {
               </div>
 
               <div className="passes-container">
-                {Object.keys(solutionsByPass).map(pass => (
-                  <PassResult
-                    key={pass}
-                    passIndex={pass}
-                    image={lastImage}
-                    solutions={solutionsByPass[pass]}
-                  />
-                ))}
+                {Object.keys(solutionsByPass).map(pass => {
+                  const currentPassInt = parseInt(pass);
+                  const clearedCells = Object.keys(solutionsByPass)
+                    .filter(p => parseInt(p) < currentPassInt)
+                    .flatMap(p => solutionsByPass[p].flatMap(s => s.cells));
+
+                  return (
+                    <PassResult
+                      key={pass}
+                      passIndex={pass}
+                      image={lastImage}
+                      solutions={solutionsByPass[pass]}
+                      clearedCells={clearedCells}
+                    />
+                  );
+                })}
               </div>
             </>
             )}
