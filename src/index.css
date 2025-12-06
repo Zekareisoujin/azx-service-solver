@@ -183,3 +183,14 @@ canvas {
   border-color: var(--text-secondary);
   color: var(--text-primary);
 }
+
+.passes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pass-result h3 {
+  margin-top: 0;
+  color: var(--text-secondary);
+}

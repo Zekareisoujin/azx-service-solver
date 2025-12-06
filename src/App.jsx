@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PasteArea from './components/PasteArea';
 import ResultsPanel from './components/ResultsPanel';
 import CalibrationPanel from './components/CalibrationPanel';
+import PassResult from './components/PassResult';
 import { processImage } from './utils/imageProcessing';
 import { scanGrid } from './utils/gridScanner';
 import { solveGrid } from './utils/solver';
@@ -14,6 +15,7 @@ function App() {
   const [gridData, setGridData] = useState(null);
   const [calibrationData, setCalibrationData] = useState(null);
   const [solutions, setSolutions] = useState([]);
+  const [lastImage, setLastImage] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('azx_calibration');
@@ -27,6 +29,7 @@ function App() {
   }, []);
 
   const handleImageProcessed = (img) => {
+    setLastImage(img);
     const result = processImage(img);
     setBlobs(result.blobs);
     setClusters(result.uniqueTemplates);
@@ -72,6 +75,13 @@ function App() {
     }
   };
 
+  // Group solutions by pass
+  const solutionsByPass = solutions.reduce((acc, sol) => {
+    if (!acc[sol.pass]) acc[sol.pass] = [];
+    acc[sol.pass].push(sol);
+    return acc;
+  }, {});
+
   return (
     <div className="container">
       <header>
@@ -80,7 +90,7 @@ function App() {
       </header>
 
       <main>
-        <PasteArea onImageProcessed={handleImageProcessed} solutions={solutions} />
+        <PasteArea onImageProcessed={handleImageProcessed} />
 
         {step === 'calibrate' && (
           <CalibrationPanel
@@ -90,11 +100,23 @@ function App() {
         )}
 
         {step === 'result' && (
-          <ResultsPanel
-            output={gridData}
-            isProcessing={false}
-            onRecalibrate={handleRecalibrate}
-          />
+          <>
+            <div className="passes-container">
+              {Object.keys(solutionsByPass).map(pass => (
+                <PassResult
+                  key={pass}
+                  passIndex={pass}
+                  image={lastImage}
+                  solutions={solutionsByPass[pass]}
+                />
+              ))}
+            </div>
+            <ResultsPanel
+              output={gridData}
+              isProcessing={false}
+              onRecalibrate={handleRecalibrate}
+            />
+          </>
         )}
       </main>
     </div>

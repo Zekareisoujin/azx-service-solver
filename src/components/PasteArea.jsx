@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const PasteArea = ({ onImageProcessed, solutions }) => {
+const PasteArea = ({ onImageProcessed }) => {
     const canvasRef = useRef(null);
     const [isWaiting, setIsWaiting] = useState(true);
     const [lastImage, setLastImage] = useState(null);
@@ -30,13 +30,7 @@ const PasteArea = ({ onImageProcessed, solutions }) => {
         return () => document.removeEventListener('paste', handlePaste);
     }, [onImageProcessed]);
 
-    useEffect(() => {
-        if (lastImage && solutions) {
-            renderImage(lastImage, solutions);
-        }
-    }, [solutions, lastImage]);
-
-    const renderImage = (img, currentSolutions = []) => {
+    const renderImage = (img) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -44,18 +38,6 @@ const PasteArea = ({ onImageProcessed, solutions }) => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
-
-        // Draw solutions
-        if (currentSolutions.length > 0) {
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#3b82f6'; // Primary blue
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
-
-            currentSolutions.forEach(sol => {
-                ctx.fillRect(sol.x, sol.y, sol.w, sol.h);
-                ctx.strokeRect(sol.x, sol.y, sol.w, sol.h);
-            });
-        }
 
         setIsWaiting(false);
     };
