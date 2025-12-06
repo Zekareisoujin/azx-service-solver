@@ -96,11 +96,13 @@ function App() {
         <div className="left-panel">
           <PasteArea onImageProcessed={handleImageProcessed} />
 
-          <div style={{ marginTop: '20px' }}>
-            <button className="secondary-button" onClick={handleRecalibrate}>
-              Recalibrate
-            </button>
-          </div>
+          {calibrationData && (
+            <div style={{ marginTop: '20px' }}>
+              <button className="secondary-button" onClick={handleRecalibrate}>
+                Recalibrate
+              </button>
+            </div>
+          )}
         </div>
 
         {step !== 'paste' && (

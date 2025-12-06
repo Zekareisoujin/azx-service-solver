@@ -1,16 +1,41 @@
-# React + Vite
+# AZX Service Solver
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based web application designed to solve number grid puzzles from the "AZX Service" game. It uses computer vision techniques to detect numbers from a pasted image and a greedy algorithm to find optimal subgrids.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+-   **Instant Image Processing**: Paste your game screenshot directly (Ctrl+V).
+-   **In-Browser Calibration**: No external dependencies. Calibrate the digit recognition once, and it's saved for future use.
+-   **Greedy Solver**: Automatically finds non-overlapping rectangular subgrids that sum to 10.
+-   **Multi-Pass with Gravity**: Simulates the game mechanics by removing solved grids and applying gravity, then solving again in multiple passes.
+-   **Visual Results**: Displays the solution for each pass as a separate image with clear bounding boxes.
+-   **Stats**: Calculates total cells cleared and potential score.
 
-## React Compiler
+## Usage
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1.  **Paste Image**: Copy a screenshot of the number grid and paste it into the app.
+2.  **Calibrate (First Time Only)**:
+    *   The app will detect unique digit shapes.
+    *   Label each shape (0-9) in the calibration panel.
+    *   Click "Save Calibration".
+3.  **View Results**: The app will automatically scan the grid and display the solutions for each pass.
+4.  **Recalibrate**: If detection is incorrect, click "Recalibrate" to clear saved data and start over.
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project uses [Vite](https://vitejs.dev/) + [React](https://reactjs.org/).
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Deployment
+
+The project is configured to deploy to GitHub Pages via GitHub Actions. Pushing to the `master` branch triggers the deployment workflow.
