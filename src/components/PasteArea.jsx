@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-const PasteArea = ({ onImageProcessed }) => {
+const PasteArea = ({ onImageProcessed, solutions }) => {
     const canvasRef = useRef(null);
     const [isWaiting, setIsWaiting] = useState(true);
+    const [lastImage, setLastImage] = useState(null);
 
     useEffect(() => {
         const handlePaste = (e) => {
@@ -14,6 +15,7 @@ const PasteArea = ({ onImageProcessed }) => {
                     const img = new Image();
 
                     img.onload = () => {
+                        setLastImage(img);
                         renderImage(img);
                         onImageProcessed(img);
                     };
@@ -28,7 +30,13 @@ const PasteArea = ({ onImageProcessed }) => {
         return () => document.removeEventListener('paste', handlePaste);
     }, [onImageProcessed]);
 
-    const renderImage = (img) => {
+    useEffect(() => {
+        if (lastImage && solutions) {
+            renderImage(lastImage, solutions);
+        }
+    }, [solutions, lastImage]);
+
+    const renderImage = (img, currentSolutions = []) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -36,6 +44,18 @@ const PasteArea = ({ onImageProcessed }) => {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
+
+        // Draw solutions
+        if (currentSolutions.length > 0) {
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#3b82f6'; // Primary blue
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+
+            currentSolutions.forEach(sol => {
+                ctx.fillRect(sol.x, sol.y, sol.w, sol.h);
+                ctx.strokeRect(sol.x, sol.y, sol.w, sol.h);
+            });
+        }
 
         setIsWaiting(false);
     };

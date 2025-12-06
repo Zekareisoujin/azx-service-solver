@@ -35,6 +35,8 @@ export const scanGrid = (blobs, calibrationData, width, height) => {
       detectedDigits.push({
         x: blob.x,
         y: blob.y,
+        w: blob.w,
+        h: blob.h,
         value: bestMatch
       });
     }
@@ -64,7 +66,7 @@ export const scanGrid = (blobs, calibrationData, width, height) => {
     rows.push(currentRow);
   }
 
-  return rows.map(row => row.map(d => d.value));
+  return rows;
 };
 
 function compareData(data1, data2) {

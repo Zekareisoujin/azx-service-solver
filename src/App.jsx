@@ -4,6 +4,7 @@ import ResultsPanel from './components/ResultsPanel';
 import CalibrationPanel from './components/CalibrationPanel';
 import { processImage } from './utils/imageProcessing';
 import { scanGrid } from './utils/gridScanner';
+import { solveGrid } from './utils/solver';
 
 function App() {
   const [step, setStep] = useState('paste'); // paste, calibrate, result
@@ -12,6 +13,7 @@ function App() {
   const [imageDims, setImageDims] = useState({ w: 0, h: 0 });
   const [gridData, setGridData] = useState(null);
   const [calibrationData, setCalibrationData] = useState(null);
+  const [solutions, setSolutions] = useState([]);
 
   useEffect(() => {
     const saved = localStorage.getItem('azx_calibration');
@@ -29,11 +31,16 @@ function App() {
     setBlobs(result.blobs);
     setClusters(result.uniqueTemplates);
     setImageDims({ w: result.width, h: result.height });
+    setSolutions([]); // Clear previous solutions
 
     if (calibrationData) {
       // Auto-scan with saved calibration
       const grid = scanGrid(result.blobs, calibrationData, result.width, result.height);
-      const outputText = grid.map(row => row.join(' ')).join('\n');
+      const solved = solveGrid(grid);
+      setSolutions(solved);
+
+      const outputText = `Found ${solved.length} subgrids summing to 10.\n\n` +
+        grid.map(row => row.map(c => c.value).join(' ')).join('\n');
       setGridData(outputText);
       setStep('result');
     } else if (result.uniqueTemplates.length > 0) {
@@ -48,7 +55,11 @@ function App() {
     setCalibrationData(data);
 
     const grid = scanGrid(blobs, data, imageDims.w, imageDims.h);
-    const outputText = grid.map(row => row.join(' ')).join('\n');
+    const solved = solveGrid(grid);
+    setSolutions(solved);
+
+    const outputText = `Found ${solved.length} subgrids summing to 10.\n\n` +
+      grid.map(row => row.map(c => c.value).join(' ')).join('\n');
     setGridData(outputText);
     setStep('result');
   };
@@ -69,7 +80,7 @@ function App() {
       </header>
 
       <main>
-        <PasteArea onImageProcessed={handleImageProcessed} />
+        <PasteArea onImageProcessed={handleImageProcessed} solutions={solutions} />
 
         {step === 'calibrate' && (
           <CalibrationPanel
