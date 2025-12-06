@@ -115,44 +115,35 @@ function createSolution(grid, rStart, cStart, rEnd, cEnd, passIndex) {
 function applyGravity(grid, solutions) {
   const rows = grid.length;
   const cols = grid[0].length;
-  const newGrid = Array(rows).fill().map(() => Array(cols).fill(null));
+  // Deep copy grid to avoid mutating the previous state if we want to keep history,
+  // but here we are evolving the grid state.
+  // We need to return a new grid structure where used cells are replaced by 0.
+  
+  const newGrid = grid.map(row => row.map(cell => {
+      if (!cell) return null;
+      return { ...cell }; // Shallow copy cell
+  }));
 
-  // Mark cells to remove
-  const toRemove = new Set();
+  const removedCells = new Set();
   solutions.forEach(sol => {
-    sol.cells.forEach(cell => {
-       // We identify cells by their unique object reference or coordinates in current grid?
-       // Since we rebuilt the grid, references might be tricky if we deep copied.
-       // But we are working on 'grid' which is the source of 'solutions'.
-       // So we can just use the cell objects if we didn't copy in between.
-       // Actually, let's just use the coordinates from the solution creation?
-       // But createSolution extracted the cell objects.
-       // Let's iterate columns and reconstruct.
-    });
+      sol.cells.forEach(c => {
+          // Find the cell in the new grid based on coordinates
+          // Since we didn't shift, coordinates [r][c] are stable?
+          // Wait, sol.cells has the cell objects from 'grid'.
+          // 'grid' cells have x,y,w,h but not r,c explicitly stored?
+          // But we know the grid structure hasn't changed if we don't shift.
+          // So we can match by x,y or just iterate grid to find match.
+          removedCells.add(c.x + ',' + c.y);
+      });
   });
-  
-  // Easier way: 
-  // 1. Create a mask of removed cells based on the solutions found in THIS pass.
-  //    (We know exactly which r,c were used because we just found them).
-  //    Wait, 'solutions' doesn't store r,c range anymore, just cells.
-  //    Let's store the range or just mark them in the grid before creating newGrid.
-  
-  // Actually, let's just iterate columns.
-  // For each column, collect all cells that are NOT in the solutions.
-  
-  // We need to know which cells are in the solutions.
-  const removedCells = new Set(solutions.flatMap(s => s.cells));
-  
-  for (let c = 0; c < cols; c++) {
-    let writeRow = rows - 1;
-    // Iterate from bottom up
-    for (let r = rows - 1; r >= 0; r--) {
-      const cell = grid[r][c];
-      if (cell && !removedCells.has(cell)) {
-        newGrid[writeRow][c] = cell;
-        writeRow--;
+
+  for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+          const cell = newGrid[r][c];
+          if (cell && removedCells.has(cell.x + ',' + cell.y)) {
+              cell.value = '0';
+          }
       }
-    }
   }
   
   return newGrid;
